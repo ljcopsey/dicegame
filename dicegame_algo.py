@@ -1,3 +1,4 @@
+import itertools
 from dice_game import DiceGame
 game = DiceGame()
 import numpy as np
@@ -26,7 +27,7 @@ class PerfectionistAgent(DiceGameAgent):
             return ()
         
         
-def play_game_with_agent(agent, game, verbose=False):
+def play_game_with_agent(agent, game, verbose=True):
     state = game.reset()
     
     if(verbose): print(f"Testing agent: \n\t{type(agent).__name__}")
@@ -81,9 +82,6 @@ if __name__ == "__main__":
             self.gamma = 0.9
             self.theta = 1
 
-            #self.state_values
-
-                    
             
         def play(self, state):
             """
@@ -96,54 +94,53 @@ if __name__ == "__main__":
             
             read the code in dicegame.py to learn more
             """
-            # YOUR CODE HERE
-            
-            print(game.get_dice_state())
-            self.val_iteration(state)
+            # YOUR CODE HERE          
+            v = self.val_iteration()
+            policy = self.find_best_actions(v)
+            print(policy)
 
 
-        def utility(self, state):
-            #print(game.final_score(game._current_dice))
-            return state[0] + state[1] + state[2]
+        def utility_dictionary(self):
+            util = {}
+            for s in game.states:
+                util[s] = 0
+            return util
+ 
+        
+        def max_action(self, state, util):
+            maximum = 0
+            for a in game.actions:
+                next_states, _, reward, probabilities = game.get_next_states(a, state)
+                temp = 0
+                for next_state, prob in zip(next_states, probabilities):
+                    if next_state is None:
+                        u = 0
+                    else: 
+                        u = util[next_state]
+                    temp = temp + prob * (reward + self.gamma * u)
+                if temp > maximum:
+                    maximum = temp 
+            return maximum, a
 
 
-        def action_probabilities(self, state):
-            states, game.actions, reward, probabilities = game.get_next_states(() , (game.get_dice_state()))
-            for s, probability in zip(state, probabilities):
-
-                # return the total score of the dice for each action
-                t = game.final_score(state)
-                a = []
-                for s in state:
-                    # reward = -1 + gamma discounted value of new state
-                    r = reward + (s * self.gamma)
-                    a.append(t * r)
-            print(max(a, key=lambda x:float(x)))
-            return 
-            
-
-
-        def val_iteration(self, state):   
-            delta = 0
-            v = np.zeros(len(state), dtype=int)
-
-            while True:
-                for s in state:
-                    prev = v.copy()
-                    #v = np.max(game.get_next_states())
-                    x = self.action_probabilities(state)
-                    print(x)
-
-                    #Bellman's equation
-                    b = game.get_next_states
-                    print(b)
-
-                    #delta = max
-                    return 
-
+        def val_iteration(self):   
+            v = self.utility_dictionary()
+            while True:            
+                delta = 0
+                for s in game.states:  
+                    temp = v[s] 
+                    v[s], _ = self.max_action(s, v)
+                    delta = max(delta, np.abs(temp - v[s]))
                 if delta < self.theta:
-                    return (0, 1, 2)
+                    return v
+            
 
+        def find_best_actions(self, v):
+            policy = {}
+            # for each state in the dictionary, find the best action 
+            for s in v:
+                _, policy[s] = self.max_action(s, v)
+            return policy
 
 
       #TESTING
