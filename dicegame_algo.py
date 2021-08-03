@@ -80,7 +80,7 @@ if __name__ == "__main__":
             
             # YOUR CODE HERE
             self.gamma = 0.9
-            self.theta = 1
+            self.theta = 0.1
 
             
         def play(self, state):
@@ -97,7 +97,7 @@ if __name__ == "__main__":
             # YOUR CODE HERE          
             v = self.val_iteration()
             policy = self.find_best_actions(v)
-            print(policy)
+            return policy
 
 
         def utility_dictionary(self):
@@ -118,8 +118,8 @@ if __name__ == "__main__":
                     else: 
                         u = util[next_state]
                     temp = temp + prob * (reward + self.gamma * u)
-                if temp > maximum:
-                    maximum = temp 
+            if temp > maximum:
+                maximum = temp 
             return maximum, a
 
 
@@ -132,7 +132,8 @@ if __name__ == "__main__":
                     v[s], _ = self.max_action(s, v)
                     delta = max(delta, np.abs(temp - v[s]))
                 if delta < self.theta:
-                    return v
+                    break
+            return v
             
 
         def find_best_actions(self, v):
@@ -140,7 +141,8 @@ if __name__ == "__main__":
             # for each state in the dictionary, find the best action 
             for s in v:
                 _, policy[s] = self.max_action(s, v)
-            return policy
+                best_action = max(policy.values())
+            return best_action
 
 
       #TESTING
